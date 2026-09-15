@@ -1,8 +1,11 @@
 # Månatlig datauppdatering
 
-Denna fil är instruktionen för den schemalagda månadsuppdateringen av
-datasetet. Den körs av en Claude-session en gång i månaden, men kan lika
-gärna följas manuellt.
+Denna fil beskriver reglerna för den månatliga uppdateringen av datasetet.
+Uppdateringen körs automatiskt av `jobs/uppdatering/` (Kubernetes CronJob,
+`k8s/cronjob.yaml`): nyheter hämtas via Google News RSS, analyseras av
+Claude enligt reglerna nedan (samma regler ligger i jobbets systemprompt),
+och nya fall sparas i databasen med status `kandidat` tills en människa
+granskat dem. Processen kan lika gärna följas manuellt.
 
 ## Syfte
 
@@ -22,18 +25,19 @@ kapital (utdelningsskatt, 3:12-regler, exitskatt m.m.).
    aldrig spekulationer, uttalanden om att "överväga att flytta" eller
    rykten. `verifierad: true` sätts bara när uppgiften stöds av primärkälla
    eller minst två oberoende medier; annars `verifierad: false`.
-3. **Uppdatera `src/lib/data.ts`:**
-   - Nya rader i `fall` enligt befintligt format (en rad per person och
-     flytthändelse). Fyll alltid i `kalla` med URL till bästa källa.
-   - Uppdatera `nyckeltal` om nya årsupplagor av Forbes-listan eller Henley
-     Private Wealth Migration Report publicerats (behåll källkritiken i
-     `not`-fältet).
-   - Sätt `meta.uppdaterad` till dagens datum.
-4. **Validera:** `npm install && npm run check && npm run build` ska gå
-   igenom utan fel.
-5. **Leverera:** committa på en gren `data-update-ÅÅÅÅ-MM` och öppna en
-   pull request mot grenen där sajten ligger, med en kort sammanfattning av
-   nya fall och deras källor. Om inget nytt hittats: ingen commit, ingen PR.
+3. **Spara som kandidater:** nya fall läggs i tabellen `flytt` med status
+   `kandidat`, `verifierad = false` och `kalla` satt till artikelns URL.
+   Kandidater visas inte på sajten.
+4. **Granska och publicera** (människa):
+
+   ```sql
+   SELECT id, namn, bolag, ar, till, kommentar, kalla FROM flytt WHERE status = 'kandidat';
+   UPDATE flytt SET status = 'publicerad', verifierad = true WHERE id = ...;  -- godkänn
+   UPDATE flytt SET status = 'avfardad' WHERE id = ...;                       -- avfärda
+   ```
+
+5. **Nyckeltal:** uppdatera tabellen `nyckeltal` manuellt när nya årsupplagor
+   av Forbes-listan eller Henley-rapporten publicerats (behåll källkritiken).
 
 ## Avgränsningar
 

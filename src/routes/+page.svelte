@@ -1,10 +1,14 @@
 <script lang="ts">
-	import { meta, nyckeltal, fall } from '$lib/data';
+	import type { PageData } from './$types';
 	import KpiTile from '$lib/components/KpiTile.svelte';
 	import ChartCard from '$lib/components/ChartCard.svelte';
 	import DecadeChart from '$lib/components/DecadeChart.svelte';
 	import DestChart from '$lib/components/DestChart.svelte';
 	import CaseTable from '$lib/components/CaseTable.svelte';
+
+	let { data }: { data: PageData } = $props();
+	const fall = $derived(data.fall);
+	const nyckeltal = $derived(data.nyckeltal);
 </script>
 
 <svelte:head>
@@ -97,7 +101,13 @@
 		</ul>
 	</section>
 
-	<footer>Status: {meta.status} · Uppdaterad {meta.uppdaterad}.</footer>
+	<footer>
+		{#if data.kandidater > 0}
+			{data.kandidater} kandidat{data.kandidater === 1 ? '' : 'er'} väntar på granskning innan publicering. ·
+		{/if}
+		Datakälla: {data.datakalla === 'databas' ? 'databas' : 'exempeldata (ingen databas ansluten)'} ·
+		Uppdaterad {data.uppdaterad}.
+	</footer>
 </main>
 
 <style>

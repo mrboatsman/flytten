@@ -1,0 +1,41 @@
+# Månatlig datauppdatering: hämtar nyheter, analyserar med Claude och sparar
+# nya fall som kandidater i databasen (granskas innan publicering, se
+# UPPDATERING.md). Körs den 1:a varje månad kl 06:00 UTC.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: flytten-uppdatering
+  namespace: flytten
+spec:
+  schedule: '0 6 1 * *'
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 1800
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: uppdatering
+              image: ghcr.io/mrboatsman/flytten:latest
+              command: ['npm', 'run', 'jobb:uppdatering']
+              env:
+                - name: DATABASE_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: flytten
+                      key: DATABASE_URL
+                - name: ANTHROPIC_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: flytten
+                      key: ANTHROPIC_API_KEY
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  memory: 512Mi

@@ -1,0 +1,32 @@
+# Lokal utveckling: docker compose up --build
+# Kör uppdateringsjobbet manuellt:
+#   docker compose run --rm -e ANTHROPIC_API_KEY=sk-ant-... web npm run jobb:uppdatering
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: flytten
+      POSTGRES_USER: flytten
+      POSTGRES_PASSWORD: flytten
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U flytten']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  web:
+    build: .
+    environment:
+      DATABASE_URL: postgres://flytten:flytten@db:5432/flytten
+    ports:
+      - '3000:3000'
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

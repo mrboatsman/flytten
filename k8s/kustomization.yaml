@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - postgres.yaml
+  - web.yaml
+  - cronjob.yaml
+# Secreten "flytten" skapas separat (SOPS/Sealed Secrets) – se secret.example.yaml.

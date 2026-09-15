@@ -1,0 +1,8 @@
+node_modules
+build
+.svelte-kit
+.git
+k8s
+docker-compose.yml
+*.md
+.vscode

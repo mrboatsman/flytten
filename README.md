@@ -6,19 +6,48 @@ flyttar från Sverige, och vart de tar vägen.
 **Status: genomförbarhetsstudie med exempeldata.** Siffrorna i
 `src/lib/data.ts` är preliminära och ska faktagranskas innan publicering.
 
-## Teknik
+## Arkitektur
 
-Byggd med [SvelteKit](https://svelte.dev/docs/kit) (Svelte 5) och
-`@sveltejs/adapter-static` – hela sajten prerendras till statiska filer och
-kan publiceras direkt på GitHub Pages eller valfri statisk host.
+Allt är [SvelteKit](https://svelte.dev/docs/kit) (Svelte 5 + TypeScript) och
+byggt för att köras i Kubernetes med FluxCD:
+
+```
+┌─────────────────┐     ┌────────────┐     ┌──────────────────────────┐
+│ SvelteKit-webb   │ ←→ │  Postgres  │ ←─  │ CronJob (månadsvis)       │
+│ adapter-node,    │     │            │     │ Google News RSS → Claude  │
+│ Docker           │     │            │     │ → nya fall som kandidater │
+└─────────────────┘     └────────────┘     └──────────────────────────┘
+```
+
+- **Webben** (`src/`) läser publicerade fall ur Postgres vid varje anrop
+  (`src/routes/+page.server.ts` → `src/lib/server/db.ts`). Utan
+  `DATABASE_URL` faller den tillbaka på seed-datat i `src/lib/data.ts`.
+- **Databasen** seedas automatiskt från `src/lib/data.ts` när tabellerna är
+  tomma; därefter är databasen sanningskällan.
+- **Uppdateringsjobbet** (`jobs/uppdatering/`) hämtar nyheter via Google
+  News RSS, låter Claude (Anthropic API) extrahera rapporterade genomförda
+  flyttar enligt reglerna i `UPPDATERING.md`, och sparar dem med status
+  `kandidat`. Kandidater visas inte på sajten förrän de granskats och
+  publicerats.
+
+### Lokal utveckling
 
 ```bash
 npm install
-npm run dev        # utvecklingsserver
-npm run build      # statisk export till build/
-npm run preview    # förhandsgranska bygget
-npm run check      # typkontroll (svelte-check)
+npm run dev                # utan databas – serverar seed-data
+docker compose up --build  # med Postgres, som i produktion
+npm run check              # typkontroll (svelte-check)
+npm run jobb:uppdatering   # kör månadsjobbet manuellt (kräver DATABASE_URL + ANTHROPIC_API_KEY)
 ```
+
+### Deploy (k8s + FluxCD)
+
+Manifest i `k8s/` (namespace, Postgres, webb-deployment, månatligt CronJob)
+med `kustomization.yaml` – peka en Flux `Kustomization` mot katalogen.
+Skapa secreten `flytten` (se `k8s/secret.example.yaml`) med SOPS eller
+Sealed Secrets: `POSTGRES_PASSWORD`, `DATABASE_URL`, `ANTHROPIC_API_KEY`.
+Container-imagen byggs till `ghcr.io/mrboatsman/flytten` av
+`.github/workflows/image.yml` vid push till `main`.
 
 ## Går det att bygga? Ja – med rätt metod
 
@@ -59,10 +88,16 @@ mörkt läge via CSS-tokens i `src/app.css`.
 
 ## Månatlig uppdatering
 
-Datasetet uppdateras en gång i månaden enligt processen i
-[UPPDATERING.md](UPPDATERING.md): research av nyrapporterade flyttar
-(särskilt skattedrivna), nya rader i `src/lib/data.ts` med käll-URL och
-verifieringsstatus, och en pull request för granskning.
+CronJobbet i `k8s/cronjob.yaml` kör `jobs/uppdatering/` den 1:a varje månad:
+nyheter hämtas, analyseras av Claude enligt kvalitetsreglerna i
+[UPPDATERING.md](UPPDATERING.md), och nya fall sparas som **kandidater** i
+databasen. Granska och publicera:
+
+```sql
+SELECT id, namn, bolag, ar, till, kommentar, kalla FROM flytt WHERE status = 'kandidat';
+UPDATE flytt SET status = 'publicerad', verifierad = true WHERE id = ...;  -- godkänn
+UPDATE flytt SET status = 'avfardad' WHERE id = ...;                       -- avfärda
+```
 
 ## Nästa steg
 

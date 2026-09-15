@@ -1,4 +1,6 @@
-// Kurerad dataset för prototypen "Flytten".
+// Seed-dataset för "Flytten". Databasen (tabellerna flytt och nyckeltal)
+// seedas härifrån när den är tom; därefter är databasen sanningskällan och
+// den här filen används bara som fallback i dev utan DATABASE_URL.
 //
 // VIKTIGT: Detta är en PRELIMINÄR dataset som demonstrerar konceptet.
 // Varje post är baserad på brett rapporterade uppgifter men ska verifieras
