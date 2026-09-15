@@ -24,6 +24,8 @@ export interface Flytt {
 	till: string;
 	aterflytt: number | null;
 	kommentar: string;
+	/** URL till bästa källa för uppgiften; null tills källa lagts in. */
+	kalla: string | null;
 	verifierad: boolean;
 }
 
@@ -65,6 +67,7 @@ export const fall: Flytt[] = [
 		till: 'Danmark',
 		aterflytt: null,
 		kommentar: 'Flyttade vidare till Schweiz 1976; återvände till Sverige 2014.',
+		kalla: null,
 		verifierad: false
 	},
 	{
@@ -75,6 +78,7 @@ export const fall: Flytt[] = [
 		till: 'Schweiz',
 		aterflytt: 2014,
 		kommentar: 'Bodde i Epalinges i nära 40 år. Flyttade hem till Småland 2014.',
+		kalla: null,
 		verifierad: false
 	},
 	{
@@ -85,6 +89,7 @@ export const fall: Flytt[] = [
 		till: 'Storbritannien',
 		aterflytt: null,
 		kommentar: 'Bosatte sig i East Sussex. Ofta citerat exempel i förmögenhetsskattedebatten.',
+		kalla: null,
 		verifierad: false
 	},
 	{
@@ -95,6 +100,7 @@ export const fall: Flytt[] = [
 		till: 'Storbritannien',
 		aterflytt: null,
 		kommentar: 'Flyttade till London under 1980-talet.',
+		kalla: null,
 		verifierad: false
 	},
 	{
@@ -105,6 +111,7 @@ export const fall: Flytt[] = [
 		till: 'Schweiz',
 		aterflytt: null,
 		kommentar: 'Bosatt i Luzern. Årtalet ungefärligt – verifiera.',
+		kalla: null,
 		verifierad: false
 	},
 	{
@@ -115,6 +122,7 @@ export const fall: Flytt[] = [
 		till: 'Schweiz',
 		aterflytt: null,
 		kommentar: 'Bosatt i Lausanne. Årtalet ungefärligt – verifiera.',
+		kalla: null,
 		verifierad: false
 	},
 	{
@@ -125,6 +133,7 @@ export const fall: Flytt[] = [
 		till: 'Bahamas',
 		aterflytt: null,
 		kommentar: 'Senare bosatt på Cypern. Årtal och länder ska verifieras.',
+		kalla: null,
 		verifierad: false
 	},
 	{
@@ -135,6 +144,7 @@ export const fall: Flytt[] = [
 		till: 'Luxemburg',
 		aterflytt: null,
 		kommentar: 'Bosatt i Luxemburg och New York. Årtalet ungefärligt – verifiera.',
+		kalla: null,
 		verifierad: false
 	}
 ];

@@ -9,7 +9,7 @@
 <div class="table-scroll">
 	<table>
 		<thead>
-			<tr><th>Person</th><th>År</th><th>Till</th><th>Kommentar</th><th>Status</th></tr>
+			<tr><th>Person</th><th>År</th><th>Till</th><th>Kommentar</th><th>Källa</th><th>Status</th></tr>
 		</thead>
 		<tbody>
 			{#each sorted as f}
@@ -21,6 +21,9 @@
 						{#if f.aterflytt}<div class="company">åter {f.aterflytt}</div>{/if}
 					</td>
 					<td>{f.kommentar}</td>
+					<td>
+						{#if f.kalla}<a href={f.kalla}>källa</a>{:else}<span class="none">–</span>{/if}
+					</td>
 					<td><span class="flag">{f.verifierad ? 'Verifierad' : 'Ej verifierad'}</span></td>
 				</tr>
 			{/each}
@@ -56,6 +59,12 @@
 	.company {
 		color: var(--text-muted);
 		font-size: 12px;
+	}
+	td a {
+		color: var(--series-1);
+	}
+	.none {
+		color: var(--text-muted);
 	}
 	.flag {
 		display: inline-block;

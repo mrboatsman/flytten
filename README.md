@@ -57,6 +57,13 @@ src/lib/components/
 Diagrammen är handskriven SVG utan diagrambibliotek, med stöd för ljust och
 mörkt läge via CSS-tokens i `src/app.css`.
 
+## Månatlig uppdatering
+
+Datasetet uppdateras en gång i månaden enligt processen i
+[UPPDATERING.md](UPPDATERING.md): research av nyrapporterade flyttar
+(särskilt skattedrivna), nya rader i `src/lib/data.ts` med käll-URL och
+verifieringsstatus, och en pull request för granskning.
+
 ## Nästa steg
 
 1. **Faktagranska datasetet** – varje rad har `verifierad: false` tills den
