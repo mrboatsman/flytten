@@ -3,19 +3,22 @@
 Prototyp: en webbsida som visar statistik över hur många miljardärer som
 flyttar från Sverige, och vart de tar vägen.
 
-**Status: genomförbarhetsstudie med exempeldata.** Siffrorna i `data/data.js`
-är preliminära och ska faktagranskas innan publicering.
+**Status: genomförbarhetsstudie med exempeldata.** Siffrorna i
+`src/lib/data.ts` är preliminära och ska faktagranskas innan publicering.
 
-## Kör lokalt
+## Teknik
 
-Ingen byggkedja behövs – öppna `index.html` direkt i webbläsaren, eller:
+Byggd med [SvelteKit](https://svelte.dev/docs/kit) (Svelte 5) och
+`@sveltejs/adapter-static` – hela sajten prerendras till statiska filer och
+kan publiceras direkt på GitHub Pages eller valfri statisk host.
 
 ```bash
-python3 -m http.server 8000
-# http://localhost:8000
+npm install
+npm run dev        # utvecklingsserver
+npm run build      # statisk export till build/
+npm run preview    # förhandsgranska bygget
+npm run check      # typkontroll (svelte-check)
 ```
-
-Sajten är statisk och kan publiceras direkt på GitHub Pages.
 
 ## Går det att bygga? Ja – med rätt metod
 
@@ -40,9 +43,19 @@ falldatan.
 ## Struktur
 
 ```
-index.html      # hela sajten – vanilla JS + SVG, ljust/mörkt läge
-data/data.js    # kurerad dataset: nyckeltal + flytthändelser
+src/lib/data.ts               # kurerad dataset: nyckeltal + flytthändelser
+src/routes/+page.svelte       # sidan: KPI:er, diagram, falltabell, källkritik
+src/lib/components/
+  KpiTile.svelte              # nyckeltalsruta
+  ChartCard.svelte            # kortram för diagram/sektioner
+  DecadeChart.svelte          # kolumndiagram: flyttar per decennium (SVG)
+  DestChart.svelte            # liggande staplar: destinationsländer (SVG)
+  CaseTable.svelte            # tabell över fallen
+  Tooltip.svelte              # hover-tooltip för diagrammen
 ```
+
+Diagrammen är handskriven SVG utan diagrambibliotek, med stöd för ljust och
+mörkt läge via CSS-tokens i `src/app.css`.
 
 ## Nästa steg
 
@@ -55,4 +68,5 @@ data/data.js    # kurerad dataset: nyckeltal + flytthändelser
    många som är bosatta utomlands, för en trendserie över tid.
 4. **Beslut om definition** – USD-miljardär (Forbes) eller SEK-miljardär
    (mycket större grupp, sämre data)?
-5. **Publicera via GitHub Pages** när datan är granskad.
+5. **Publicera via GitHub Pages** när datan är granskad
+   (`npm run build` + deploy av `build/`).
